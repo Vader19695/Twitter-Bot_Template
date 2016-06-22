@@ -28,11 +28,20 @@ def main():
 
 def GetStatus(args):
 	if(args["function"].lower() == "countdown"):
-		return str(args["message"]) % RemainingTime(args["date"])
+		try:
+			return str(args["message"]) % RemainingTime(args["date"])
+		except Exception as e:
+			Log("error", str(e), configurationArray[-1])
 	elif(args["function"].lower() == "standard"):
-		return args["message"]
+		try:
+			return args["message"]
+		except Exception as e:
+			Log("error", str(e), configurationArray[-1])
 	elif(args["function"].lower() == "substitute"):
-		return args["message"].split("\'")[1] % function_mappings[args["message"].split("\'")[-1].split("%")[-1].strip(" ")]
+		try:
+			return args["message"].split("\'")[1] % function_mappings[args["message"].split("\'")[-1].split("%")[-1].strip(" ")]
+		except Exception as e:
+			Log("error", str(e), configurationArray[-1])
 	else:
 		print("Invalid Function!")
 		exit(1)
