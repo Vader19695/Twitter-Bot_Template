@@ -53,7 +53,7 @@ def parseargs():
 	parser = argparse.ArgumentParser(prog="Twitter Bot")
 	parser.add_argument("-f", "--function", help="Please enter the type of bot you wish to use. E.g.(Coutdown, Standard, Substitute)", required=True)
 	parser.add_argument("-d", "--date", help="Please enter your date in the form: MM/DD/YYYY")
-	parser.add_argument("-m", "--message", help="Please enter the message you wish to send.")
+	parser.add_argument("-m", "--message", help="Please enter the message you wish to send.", required=True)
 	args = parser.parse_args()
 
 	return args

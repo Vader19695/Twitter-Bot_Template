@@ -1,7 +1,7 @@
 # Customer Key here
 APP_KEY=
 	
-# Customer secret here
+# Customer Secret here
 APP_SECRET=
 	
 # Access Token here
@@ -10,7 +10,7 @@ OAUTH_TOKEN=
 # Access Token Secret here
 OAUTH_TOKEN_SECRET=
 
-# Log Path
+# Standard Log Path
 LOG = /var/log/Twitter-Bot/Twitter-Bot.log
 
 # Error Log Path
