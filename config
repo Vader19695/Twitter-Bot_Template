@@ -1,0 +1,18 @@
+# Customer Key here
+APP_KEY=
+	
+# Customer Secret here
+APP_SECRET=
+	
+# Access Token here
+OAUTH_TOKEN=
+
+# Access Token Secret here
+OAUTH_TOKEN_SECRET=
+
+# Standard Log Path
+LOG = /var/log/Twitter-Bot/Twitter-Bot.log
+
+# Error Log Path
+ERROR_LOG = /var/log/Twitter-Bot/Twitter-Bot_Error.log
+
