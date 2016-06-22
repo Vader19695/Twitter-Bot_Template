@@ -22,7 +22,7 @@ def main():
 	# Update status
 	try:
 		twitter.update_status(status=statusDisplay)
-		Log("", statusDisplay, configurationArray[-1])
+		Log("", statusDisplay, configurationArray[4])
 	except Exception as e:
 		Log("error", str(e), configurationArray[-1])
 
