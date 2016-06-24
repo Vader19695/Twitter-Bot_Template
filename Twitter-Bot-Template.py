@@ -17,7 +17,9 @@ def main():
 	twitter = Twython(configurationArray[0], configurationArray[1], configurationArray[2], configurationArray[3])
 
 	# Retrive the status
-	statusDisplay = GetStatus(vars(args))
+	statusDisplay = GetStatus(vars(args), configurationArray)
+	
+	print(statusDisplay)
 	
 	# Update status
 	try:
@@ -25,8 +27,8 @@ def main():
 		Log("", statusDisplay, configurationArray[4])
 	except Exception as e:
 		Log("error", str(e), configurationArray[-1])
-
-def GetStatus(args):
+	
+def GetStatus(args, configurationArray):
 	if(args["function"].lower() == "countdown"):
 		try:
 			return str(args["message"]) % RemainingTime(args["date"])
@@ -47,7 +49,20 @@ def GetStatus(args):
 		exit(1)
 			
 def RemainingTime(date):
-	return date
+	today = datetime.date.today()
+	date_array = date.split("/")
+	future_date = datetime.date(int(date_array[2]), int(date_array[0]), int(date_array[1]))
+	date_delta = (future_date-today).days
+	
+	if(date_delta > 1):
+		return("in %s days!" % str(date_delta))
+	elif(date_delta == 1):
+		return("tomorrow!")
+	elif(date_delta == 0):
+		return("today!")
+	elif(date_delta < 0):
+		Log("error", "The date specified has already passed.", configurationArray[-1])
+		exit(0)
 
 def parseargs():
 	parser = argparse.ArgumentParser(prog="Twitter Bot")
