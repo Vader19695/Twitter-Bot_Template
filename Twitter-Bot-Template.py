@@ -1,7 +1,7 @@
 from twython import Twython
 import datetime, argparse
 
-# Global
+# Global variables
 function_mappings = {
         "date_now": datetime.datetime.today().strftime("%A %B %d, %Y at %I:%M %p")
 }
@@ -17,9 +17,7 @@ def main():
 	twitter = Twython(configurationArray[0], configurationArray[1], configurationArray[2], configurationArray[3])
 
 	# Retrive the status
-	statusDisplay = GetStatus(vars(args), configurationArray)
-	
-	print(statusDisplay)
+	statusDisplay = GenerateStatus(vars(args), configurationArray)
 	
 	# Update status
 	try:
@@ -27,28 +25,46 @@ def main():
 		Log("", statusDisplay, configurationArray[4])
 	except Exception as e:
 		Log("error", str(e), configurationArray[-1])
+
+# Function will generate the twitter status
+# Depends on the function selection
+def GenerateStatus(args, configurationArray):
 	
-def GetStatus(args, configurationArray):
+	
+	# If function is countdown
+	# Determine how long until specified date
+	# Substitute into entered message
 	if(args["function"].lower() == "countdown"):
 		try:
 			return str(args["message"]) % RemainingTime(args["date"])
 		except Exception as e:
 			Log("error", str(e), configurationArray[-1])
+	
+	# If function is standard
+	# Return status as entered message
 	elif(args["function"].lower() == "standard"):
 		try:
 			return args["message"]
 		except Exception as e:
 			Log("error", str(e), configurationArray[-1])
+			
+	# If function is substitute
+	# Substitute specified function into entered message
 	elif(args["function"].lower() == "substitute"):
 		try:
-			return args["message"].split("\'")[1] % function_mappings[args["message"].split("\'")[-1].split("%")[-1].strip(" ")]
+			message_split = args["message"].split(" % ")
+			if(message_split[-1].strip(" ") not in function_mappings):
+				return message_split[0][1:-1] % message_split[-1].strip(" ")
+			return message_split[0][1:-1] % function_mappings[message_split[-1].strip(" ")]
 		except Exception as e:
 			Log("error", str(e), configurationArray[-1])
 	else:
 		print("Invalid Function!")
 		exit(1)
 			
+# Determine how long until specified date
 def RemainingTime(date):
+	# Local Variables
 	today = datetime.date.today()
 	date_array = date.split("/")
 	future_date = datetime.date(int(date_array[2]), int(date_array[0]), int(date_array[1]))
@@ -61,7 +77,7 @@ def RemainingTime(date):
 	elif(date_delta == 0):
 		return("today!")
 	elif(date_delta < 0):
-		Log("error", "The date specified has already passed.", configurationArray[-1])
+		Log("error", "The date specified has already passed.", configurationArray[3])
 		exit(0)
 
 def parseargs():
@@ -85,10 +101,10 @@ def GetConfiguration():
 
 	return config
 	
-
+# Function will log based on log_type, the logging message and the specified path
 def Log(log_type, message, path):
 	logger = open(path, "a")
 	logger.write("[%s] %s: %s\n" % (function_mappings["date_now"], log_type.upper(), message))
 	logger.close()
 	
-main()
+if __name__ == "__main__": main()
