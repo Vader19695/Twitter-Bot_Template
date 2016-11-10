@@ -36,7 +36,7 @@ def GenerateStatus(args, configurationArray):
 	# Substitute into entered message
 	if(args["function"].lower() == "countdown"):
 		try:
-			return str(args["message"]) % RemainingTime(args["date"])
+			return str(args["message"]) % RemainingTime(args["date"], configurationArray)
 		except Exception as e:
 			Log("error", str(e), configurationArray[-1])
 	
@@ -63,7 +63,7 @@ def GenerateStatus(args, configurationArray):
 		exit(1)
 			
 # Determine how long until specified date
-def RemainingTime(date):
+def RemainingTime(date, configurationArray):
 	# Local Variables
 	today = datetime.date.today()
 	date_array = date.split("/")
