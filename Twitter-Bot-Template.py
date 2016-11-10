@@ -55,7 +55,7 @@ def GenerateStatus(args, configurationArray):
 			message_split = args["message"].split(" % ")
 			if(message_split[-1].strip(" ") not in function_mappings):
 				return message_split[0][1:-1] % message_split[-1].strip(" ")
-			return message_split[0][1:-1] % function_mappings[message_split[-1].strip(" ")]
+			return message_split[0][0:] % function_mappings[message_split[-1].strip(" ")]
 		except Exception as e:
 			Log("error", str(e), configurationArray[-1])
 	else:
