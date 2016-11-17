@@ -33,6 +33,13 @@ def LoadConfiguration(user):
 
 	return dict1
 
+def LoadPolls():
+	if(path.isfile("polls.cfg.default")):
+		Config.read("polls.cfg.default")
+	else:
+		Config.read("polls.cfg")
+	
+
 def LoadTwitterAccount(user):
 	configurationDict = LoadConfiguration(user)
 	try:
@@ -52,7 +59,7 @@ def parseargs():
 def GenerateStatus(name, time, user, function, date=None, message='', substitute_message=None):
 	twitter = LoadTwitterAccount(user)
 	if(function.lower() == "countdown"):
-		final_message=message % RemainingTime(date))
+		final_message=(message % RemainingTime(date))
 	elif(function.lower() == "substitute"):
 		final_message=(message % substitute_message)
 	elif(function.lower() == "standard"):
@@ -79,7 +86,7 @@ def RemainingTime(date):
 	else:
 		exit()
 
-
+'''
 polls = {
 	'Rogue One Countdown': pyCron.Poll('0 0 * * *', GenerateStatus,
 		dict(
@@ -98,6 +105,7 @@ polls = {
 		)
 	)
 }
+'''
 
 for name, poll in polls.iteritems():
 	pyCron.add_poll(name, poll)
