@@ -1,73 +1,73 @@
+import ConfigParser, argparse, datetime
+from os import path
 from twython import Twython
-import datetime, argparse
 
-# Global variables
-function_mappings = {
-        "date_now": datetime.datetime.today().strftime("%A %B %d, %Y at %I:%M %p")
-}
+import pyCron
 
-def main():
-	# Load configuration
-	configurationArray=GetConfiguration()	
-	
-	# Load parameters
-	args=parseargs()
-	
-	# Define twitter
-	twitter = Twython(configurationArray[0], configurationArray[1], configurationArray[2], configurationArray[3])
+######## Global Vars #########
+Config = ConfigParser.ConfigParser()
 
-	# Retrive the status
-	statusDisplay = GenerateStatus(vars(args), configurationArray)
-	
-	# Update status
-	try:
-		twitter.update_status(status=statusDisplay)
-		Log("", statusDisplay, configurationArray[4])
-	except Exception as e:
-		Log("error", str(e), configurationArray[-1])
-
-# Function will generate the twitter status
-# Depends on the function selection
-def GenerateStatus(args, configurationArray):
-	
-	
-	# If function is countdown
-	# Determine how long until specified date
-	# Substitute into entered message
-	if(args["function"].lower() == "countdown"):
-		try:
-			return str(args["message"]) % RemainingTime(args["date"], configurationArray)
-		except Exception as e:
-			Log("error", str(e), configurationArray[-1])
-	
-	# If function is standard
-	# Return status as entered message
-	elif(args["function"].lower() == "standard"):
-		try:
-			return args["message"]
-		except Exception as e:
-			Log("error", str(e), configurationArray[-1])
-			
-	# If function is substitute
-	# Substitute specified function into entered message
-	elif(args["function"].lower() == "substitute"):
-		try:
-			message_split = args["message"].split(" % ")
-			if(message_split[-1].strip(" ") not in function_mappings):
-				return message_split[0][1:-1] % message_split[-1].strip(" ")
-			return message_split[0][0:] % function_mappings[message_split[-1].strip(" ")]
-		except Exception as e:
-			Log("error", str(e), configurationArray[-1])
+'''
+Eventually this will be replaced to remove the *.default check
+Replace with *.cfg check
+'''
+def LoadConfiguration(user):
+	if(path.isfile("config.cfg.default")):
+		# Log("Exists!")
+		Config.read("config.cfg.default")
 	else:
-		print("Invalid Function!")
-		exit(1)
-			
-# Determine how long until specified date
-def RemainingTime(date, configurationArray):
-	# Local Variables
-	today = datetime.date.today()
-	date_array = date.split("/")
-	future_date = datetime.date(int(date_array[2]), int(date_array[0]), int(date_array[1]))
+		# Log("Does not exist!")
+		# exit()
+		Config.read("config.cfg")
+	options=Config.options(user)
+	'''
+	Iterate over options loaded for the section
+	Load into a dictionary dict1
+	'''
+	dict1 = {}
+	for option in options:
+		try:
+			dict1[option] = Config.get(user, option)
+		except:
+			dict1[option] = None
+
+	return dict1
+
+def LoadTwitterAccount(user):
+	configurationDict = LoadConfiguration(user)
+	try:
+		twitter = Twython(configurationDict["app_key"], configurationDict["app_secret"], configurationDict["oauth_token"], configurationDict["oauth_token_secret"])
+	except:
+		print("There was an issue with your configuration!")
+	return twitter
+''''
+def parseargs():
+	parser=argparse.ArgumentParser(prog="TwitterBot")
+	parser.add_arugment("-m", "--message", help="Please enter the tweet you wish to send."
+	args=parser.parse_args()
+	return args
+'''
+
+
+def GenerateStatus(name, time, user, function, date=None, message='', substitute_message=None):
+	twitter = LoadTwitterAccount(user)
+	if(function.lower() == "countdown"):
+		final_message=message % RemainingTime(date))
+	elif(function.lower() == "substitute"):
+		final_message=(message % substitute_message)
+	elif(function.lower() == "standard"):
+		final_message=(message)
+	else:
+		exit()
+	try:
+		twitter.update_status(status=final_message)
+	except:
+		exit()
+	
+def RemainingTime(date):
+	today=datetime.date.today()
+	date_array=date.split("/")
+	future_date=datetime.date(int(date_array[2]), int(date_array[0]), int(date_array[1]))
 	date_delta = (future_date-today).days
 	
 	if(date_delta > 1):
@@ -76,35 +76,31 @@ def RemainingTime(date, configurationArray):
 		return("tomorrow!")
 	elif(date_delta == 0):
 		return("today!")
-	elif(date_delta < 0):
-		Log("error", "The date specified has already passed.", configurationArray[3])
-		exit(0)
+	else:
+		exit()
 
-def parseargs():
-	parser = argparse.ArgumentParser(prog="Twitter Bot")
-	parser.add_argument("-f", "--function", help="Please enter the type of bot you wish to use. E.g.(Coutdown, Standard, Substitute)", required=True)
-	parser.add_argument("-d", "--date", help="Please enter your date in the form: MM/DD/YYYY")
-	parser.add_argument("-m", "--message", help="Please enter the message you wish to send.", required=True)
-	args = parser.parse_args()
 
-	return args
+polls = {
+	'Rogue One Countdown': pyCron.Poll('0 0 * * *', GenerateStatus,
+		dict(
+			user='ResterJ',
+			function='Countdown',
+			date='12/16/2016',
+			message='Rogue One: A Star Wars Story is released %s'
+		)
+	),
+	'Morning Hello': pyCron.Poll('30 7 * * *', GenerateStatus, 
+		dict(
+			user='ResterJ',
+			function='Substitute',
+			message='Good morning everyone! Today is %s! May God bless you today!',
+			substitute_message=datetime.datetime.now().strftime('%A %B %d, %Y at %I:%M %p')
+		)
+	)
+}
 
-# Load the configuration from the config file
-def GetConfiguration():
-	# Local Variables
-	config = []
-	
-	fr = open("config", "r")
-	for line in fr.readlines():
-		if "=" in line:
-			config.append(line.split("=")[1].strip(" ").rstrip())
+for name, poll in polls.iteritems():
+	pyCron.add_poll(name, poll)
 
-	return config
-	
-# Function will log based on log_type, the logging message and the specified path
-def Log(log_type, message, path):
-	logger = open(path, "a")
-	logger.write("[%s] %s: %s\n" % (function_mappings["date_now"], log_type.upper(), message))
-	logger.close()
-	
-if __name__ == "__main__": main()
+if __name__ == "__main__":
+	pyCron.run_Cron()
