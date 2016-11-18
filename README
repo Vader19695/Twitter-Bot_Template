@@ -84,3 +84,10 @@ date: None # Date should be entered in as (MM/DD/YYYY)
 message: <status>
 substitute_message: None # can either be string or python function
 
+
+Setup instructions
+1. Run pip to install all of the required packages.
+	pip install -r requirements.txt
+2. Run setup.py to get your twitter credentials.
+3. Setup your twitter bots under polls.cfg using the examples given above.
+4. Run the Twitter-Bot-Template
