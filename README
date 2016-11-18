@@ -3,5 +3,84 @@ Twitter-Bot Template
 ***This template is currently in alpha phase***
 
 This template allows for the quick setup of Twitter Bots.
-It is a general purpose template that combines several different types of Twitter Bots
-into one script. 
+It is a general purpose template that combines several different types of Twitter Bots into one script.
+
+The script is designed to trigger the bots at a specified time using a cron-like system developed by Gustave Michel.
+
+Twitter authentication is defined under config.cfg. 
+
+Bots are defined under polls.cfg
+
+Four types of bots are supported currently:
+	-Countdown
+	-Functional
+	-Substitute
+	-Standard
+	
+Each bot is defined and an example is given in greater detail below.
+
+####Countdown####
+This bot is designed to take in a date and determine the number of days until that date appears. The bot requires a string to already exist. An example is shown below:
+
+	[Countdown Example]
+	time: 0 0 * * * 
+	user: ExampleUser
+	function: Countdown
+	date: 12/31/1969 # dates should be entered in the MM/DD/YYYY format
+	message: The epoch begins %s!
+	substitute_message: None
+	
+This configuration will cause the bot to run at midnight everyday. 
+Should the date be 12/15/1969 the bot will tweet: "The epoch begins in 16 days!"
+Should the date be 12/30/1969 the bot will tweet: "The epoch begins tomorrow!"
+Should the date be 12/31/1969 the bot will tweet: "The epoch begins today!"
+Should the date be after the specified date the bot will not tweet.
+
+####Function####
+This bot is designed to take in a python function and substitute the result of the function into the tweet. The bot requires a string to already exist. An example is shown below:
+
+	[Functional Example]
+	time: 0 0 * * *
+	user: ExampleUser
+	function: Functional
+	date: None # notice date will not be used by this bot
+	message: Today is %s.
+	substitute_message: datetime.date.today() # this must be defined for this bot-type
+
+####Substitute####
+This bot is designed to substitute a hardcoded string into a tweet. The bot requires a string to already exist. An example is shown below:
+
+	[Substitute Example]
+	time: 0 0 * * *
+	user: ExampleUser
+	function: Substitute
+	date: None # notice date will not be used by this bot
+	message: Hello %s
+	substitute_message: @examplefriend # this must be defined for this bot-type
+
+This configuration will cause the bot to run at midnight everyday. The bot will always tweet "Hello @examplefriend"
+
+####Standard####
+This bot is designed to tweet a hardcoded message. The bot requires the string to be defined. An example is shown below:
+
+	[Standard Example]
+	time: 0 0 * * *
+	user: ExampleUser
+	function: Standard
+	date: None # notice date will not be used by this bot
+	message: This is a standard tweet.
+	substitute_message: None # notice substitute_message will not be used by this bot
+	
+This configuration will cause the bot to run at midnight everyday. The bot will always tweet "This is a standard tweet."
+
+Please ensure that for each bot configuration all of the fields shown in the template below are included.
+
+####Template####
+[<Bot Name>]
+time: minute hour monthday month weekday
+user: <Twitter Handle> # Should be the same as what is entered in under config.cfg
+function: <Function to Use>
+date: None # Date should be entered in as (MM/DD/YYYY)
+message: <status>
+substitute_message: None # can either be string or python function
+

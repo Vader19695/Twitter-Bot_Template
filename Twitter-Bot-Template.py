@@ -1,16 +1,15 @@
-import ConfigParser, argparse, datetime
+import ConfigParser, datetime
 from os import path
 from twython import Twython
-
 import pyCron
 
 ######## Global Vars #########
 Config = ConfigParser.ConfigParser()
 
-'''
+"""
 Eventually this will be replaced to remove the *.default check
 Replace with *.cfg check
-'''
+"""
 def LoadConfiguration(user):
 	if(path.isfile("config.cfg.default")):
 		# Log("Exists!")
@@ -20,10 +19,10 @@ def LoadConfiguration(user):
 		# exit()
 		Config.read("config.cfg")
 	options=Config.options(user)
-	'''
+	"""
 	Iterate over options loaded for the section
 	Load into a dictionary dict1
-	'''
+	"""
 	dict1 = {}
 	for option in options:
 		try:
@@ -38,7 +37,20 @@ def LoadPolls():
 		Config.read("polls.cfg.default")
 	else:
 		Config.read("polls.cfg")
-	
+	polls = {}
+	names=Config.sections()
+	for name in names:
+		options=Config.options(name)
+		polls[name] = pyCron.Poll(Config.get(name, "time"), GenerateStatus, 
+					dict(
+						user=Config.get(name, "user"),
+						function=Config.get(name, "function"),
+						date=Config.get(name, "date"),
+						message=Config.get(name, "message"),
+						substitute_message=Config.get(name, "substitute_message")
+					)
+				)
+	return polls
 
 def LoadTwitterAccount(user):
 	configurationDict = LoadConfiguration(user)
@@ -47,29 +59,24 @@ def LoadTwitterAccount(user):
 	except:
 		print("There was an issue with your configuration!")
 	return twitter
-''''
-def parseargs():
-	parser=argparse.ArgumentParser(prog="TwitterBot")
-	parser.add_arugment("-m", "--message", help="Please enter the tweet you wish to send."
-	args=parser.parse_args()
-	return args
-'''
 
-
-def GenerateStatus(name, time, user, function, date=None, message='', substitute_message=None):
+def GenerateStatus(name, time, user, function, date=None, message="", substitute_message=None):
 	twitter = LoadTwitterAccount(user)
 	if(function.lower() == "countdown"):
 		final_message=(message % RemainingTime(date))
+	elif(function.lower() == "functional"):
+		final_message=(message % eval(substitute_message))
 	elif(function.lower() == "substitute"):
 		final_message=(message % substitute_message)
 	elif(function.lower() == "standard"):
 		final_message=(message)
 	else:
-		exit()
+		exit(0)
+		
 	try:
 		twitter.update_status(status=final_message)
 	except:
-		exit()
+		exit(1)
 	
 def RemainingTime(date):
 	today=datetime.date.today()
@@ -78,36 +85,18 @@ def RemainingTime(date):
 	date_delta = (future_date-today).days
 	
 	if(date_delta > 1):
-		return("in %s days!" % str(date_delta))
+		return("in %s days" % str(date_delta))
 	elif(date_delta == 1):
-		return("tomorrow!")
+		return("tomorrow")
 	elif(date_delta == 0):
-		return("today!")
+		return("today")
 	else:
-		exit()
+		exit(1)
 
-'''
-polls = {
-	'Rogue One Countdown': pyCron.Poll('0 0 * * *', GenerateStatus,
-		dict(
-			user='ResterJ',
-			function='Countdown',
-			date='12/16/2016',
-			message='Rogue One: A Star Wars Story is released %s'
-		)
-	),
-	'Morning Hello': pyCron.Poll('30 7 * * *', GenerateStatus, 
-		dict(
-			user='ResterJ',
-			function='Substitute',
-			message='Good morning everyone! Today is %s! May God bless you today!',
-			substitute_message=datetime.datetime.now().strftime('%A %B %d, %Y at %I:%M %p')
-		)
-	)
-}
-'''
+polls=LoadPolls()
 
 for name, poll in polls.iteritems():
+	print(name)
 	pyCron.add_poll(name, poll)
 
 if __name__ == "__main__":
