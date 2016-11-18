@@ -2,5 +2,6 @@
 *.default
 *.swp
 log
+test.py
 venv/
 
