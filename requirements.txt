@@ -1,0 +1,8 @@
+croniter==0.3.13
+oauthlib==2.0.0
+pkg-resources==0.0.0
+python-dateutil==2.6.0
+requests==2.12.1
+requests-oauthlib==0.7.0
+six==1.10.0
+twython==3.4.0
