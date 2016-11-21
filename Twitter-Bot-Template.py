@@ -96,7 +96,7 @@ def RemainingTime(date):
 polls=LoadPolls()
 
 for name, poll in polls.iteritems():
-	print(name)
+	#print(name)
 	pyCron.add_poll(name, poll)
 
 if __name__ == "__main__":
